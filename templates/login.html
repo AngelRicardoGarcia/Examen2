@@ -3,26 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Control Motor</title>
+    <title>ThermalDrive | Login</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="auth">
+    <div class="bg-gradient"></div>
     <div class="auth-wrap">
         <div class="auth-card">
-            <div class="auth-head">
-                <h1>🔐 Control Motor DC</h1>
-                <p>Sistema por Temperatura</p>
+            <div class="logo-area" style="justify-content: center; margin-bottom: 24px;">
+                <div class="logo-icon">
+                    <i class="fas fa-microchip"></i>
+                </div>
+                <div class="logo-text">
+                    <h2>Thermal<span>Drive</span></h2>
+                    <p>Control Inteligente</p>
+                </div>
             </div>
-            <form method="POST">
+            <div class="auth-head">
+                <h1>Bienvenido</h1>
+                <p>Ingresa tus credenciales para acceder al sistema</p>
+            </div>
+            <form method="POST" class="auth-form">
                 <label>Usuario</label>
-                <input type="text" name="username" required autofocus>
+                <input type="text" name="username" placeholder="admin" required autofocus>
                 <label>Contraseña</label>
-                <input type="password" name="password" required>
-                <button type="submit" class="auth-btn">Ingresar</button>
+                <input type="password" name="password" placeholder="••••••••" required>
+                <button type="submit" class="auth-btn">
+                    <i class="fas fa-arrow-right-to-bracket"></i>
+                    Iniciar Sesión
+                </button>
                 {% if error %}
-                <div class="error">{{ error }}</div>
+                <div class="error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    {{ error }}
+                </div>
                 {% endif %}
             </form>
+            <div class="auth-footer">
+                <p>Sistema de Control de Motor por Temperatura</p>
+                <p>Examen Segundo Parcial</p>
+            </div>
         </div>
     </div>
 </body>
