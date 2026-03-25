@@ -6,6 +6,7 @@ Aplicación Flask - Interfaz Web para Control de Motor
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from werkzeug.security import check_password_hash
 import socket
+import os
 
 # CONFIGURACIÓN
 APP_USER = "admin"
@@ -14,7 +15,10 @@ SECRET_KEY = "clave_para_examen_motor_2024"
 TCP_HOST = "127.0.0.1"
 TCP_PORT = 5001
 
-app = Flask(__name__)
+app = Flask(__name__, 
+            template_folder="templates",
+            static_folder="static",
+            static_url_path="/static")
 app.secret_key = SECRET_KEY
 
 estado_cache = {
@@ -92,10 +96,11 @@ def api_motor():
     return jsonify({"ok": False, "error": resp}), 500
 
 if __name__ == "__main__":
-    print("=" * 40)
-    print("Servidor Web - Control Motor")
-    print("Usuario: admin")
-    print("Contraseña: motor123")
-    print("Accede: http://localhost:5000")
-    print("=" * 40)
+    print("=" * 50)
+    print("  THERMALDRIVE - Control Inteligente de Motor")
+    print("=" * 50)
+    print("  Usuario: admin")
+    print("  Contraseña: motor123")
+    print("  Accede a: http://localhost:5000")
+    print("=" * 50)
     app.run(host="0.0.0.0", port=5000, debug=True)
