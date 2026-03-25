@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Control Motor</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="auth">
+    <div class="auth-wrap">
+        <div class="auth-card">
+            <div class="auth-head">
+                <h1>🔐 Control Motor DC</h1>
+                <p>Sistema por Temperatura</p>
+            </div>
+            <form method="POST">
+                <label>Usuario</label>
+                <input type="text" name="username" required autofocus>
+                <label>Contraseña</label>
+                <input type="password" name="password" required>
+                <button type="submit" class="auth-btn">Ingresar</button>
+                {% if error %}
+                <div class="error">{{ error }}</div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</body>
+</html>
