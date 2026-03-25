@@ -1,52 +1,126 @@
-const logEl = document.getElementById("log");
-const btnClear = document.getElementById("btnClear");
+// Elementos DOM
+const tempValor = document.getElementById('tempValor');
+const velocidadValor = document.getElementById('velocidadValor');
+const pwmValor = document.getElementById('pwmValor');
+const rangoTexto = document.getElementById('rangoTexto');
+const estadoTexto = document.getElementById('estadoTexto');
+const rangoBadge = document.getElementById('rangoBadge');
+const motorStatusBadge = document.getElementById('motorStatusBadge');
+const speedBar = document.getElementById('speedBar');
+const speedPercent = document.getElementById('speedPercent');
+const motorIcon = document.getElementById('motorIcon');
+const rangeIndicator = document.getElementById('rangeIndicator');
+const lastUpdateSpan = document.getElementById('lastUpdate');
+const healthFill = document.getElementById('healthFill');
+const manualSlider = document.getElementById('manualSlider');
+const manualValue = document.getElementById('manualValue');
+const modeAutoBtn = document.getElementById('modeAutoBtn');
+const modeManualBtn = document.getElementById('modeManualBtn');
+const manualControl = document.getElementById('manualControl');
+const logDiv = document.getElementById('log');
+const btnRefresh = document.getElementById('btnRefresh');
 
-function writeLog(msg) {
-    const t = new Date().toLocaleTimeString();
-    logEl.textContent = `[${t}] ${msg}\n` + logEl.textContent;
+let modoAutomatico = true;
+let tempGaugeChart = null;
+let lastTemperatura = 0;
+
+// Inicializar gráfico de temperatura
+function initTempGauge() {
+    const canvas = document.getElementById('tempGauge');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    
+    tempGaugeChart = {
+        draw: function(value) {
+            ctx.clearRect(0, 0, 200, 200);
+            
+            // Fondo del gauge
+            ctx.beginPath();
+            ctx.arc(100, 100, 85, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255,255,255,0.05)';
+            ctx.fill();
+            
+            // Arco de temperatura
+            const angle = (value / 50) * Math.PI * 2;
+            ctx.beginPath();
+            ctx.arc(100, 100, 85, -Math.PI / 2, -Math.PI / 2 + angle);
+            
+            let gradient = ctx.createLinearGradient(0, 0, 200, 200);
+            if (value < 25) {
+                gradient.addColorStop(0, '#10b981');
+                gradient.addColorStop(1, '#34d399');
+            } else if (value <= 30) {
+                gradient.addColorStop(0, '#f59e0b');
+                gradient.addColorStop(1, '#fbbf24');
+            } else {
+                gradient.addColorStop(0, '#ef4444');
+                gradient.addColorStop(1, '#f87171');
+            }
+            
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = 12;
+            ctx.stroke();
+            
+            // Marcadores
+            ctx.font = '10px Inter';
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillText('0°C', 15, 105);
+            ctx.fillText('25°C', 85, 25);
+            ctx.fillText('50°C', 165, 105);
+        }
+    };
+    
+    tempGaugeChart.draw(0);
+}
+
+function updateTempGauge(value) {
+    if (tempGaugeChart) {
+        tempGaugeChart.draw(value);
+    }
+    document.getElementById('gaugeTempValue').textContent = value.toFixed(1);
+}
+
+function writeLog(message, type = 'system') {
+    const entry = document.createElement('div');
+    entry.className = `log-entry ${type}`;
+    const time = new Date().toLocaleTimeString();
+    entry.innerHTML = `[${time}] ${message}`;
+    logDiv.insertBefore(entry, logDiv.firstChild);
+    
+    // Limitar número de entradas
+    while (logDiv.children.length > 50) {
+        logDiv.removeChild(logDiv.lastChild);
+    }
 }
 
 async function actualizarEstado() {
     try {
-        const res = await fetch("/api/estado");
+        const res = await fetch('/api/estado');
         const data = await res.json();
         
-        document.getElementById("tempValor").innerHTML = data.temperatura.toFixed(1);
-        document.getElementById("rangoTexto").innerHTML = data.rango;
-        document.getElementById("velocidadValor").innerHTML = data.velocidad_porcentaje;
-        document.getElementById("estadoTexto").innerHTML = data.estado_sistema;
+        // Actualizar valores principales
+        tempValor.innerHTML = data.temperatura.toFixed(1);
+        velocidadValor.innerHTML = data.velocidad_porcentaje;
+        pwmValor.innerHTML = data.velocidad;
+        rangoTexto.innerHTML = data.rango;
+        estadoTexto.innerHTML = data.estado_sistema;
         
-        const tempPorc = Math.min(100, Math.max(0, (data.temperatura / 50) * 100));
-        document.getElementById("gaugeFill").style.width = tempPorc + "%";
-        document.getElementById("progressFill").style.width = data.velocidad_porcentaje + "%";
-        
-        const motorBadge = document.getElementById("motorBadge");
-        if (data.velocidad_porcentaje <= 30) {
-            motorBadge.innerHTML = "🐢 Velocidad Baja (30%)";
-            motorBadge.style.background = "rgba(34,197,94,0.2)";
-        } else if (data.velocidad_porcentaje <= 60) {
-            motorBadge.innerHTML = "⚡ Velocidad Media (60%)";
-            motorBadge.style.background = "rgba(249,115,22,0.2)";
-        } else {
-            motorBadge.innerHTML = "🚀 Velocidad Alta (100%)";
-            motorBadge.style.background = "rgba(239,68,68,0.2)";
-        }
-        
-        document.getElementById("dotTemp").style.background = data.temperatura > 30 ? "#ef4444" : (data.temperatura > 25 ? "#f97316" : "#22c55e");
-        document.getElementById("dotRango").style.background = data.rango.includes("ALTO") ? "#ef4444" : (data.rango.includes("MEDIO") ? "#f97316" : "#22c55e");
-        document.getElementById("dotMotor").style.background = data.velocidad_porcentaje > 60 ? "#ef4444" : (data.velocidad_porcentaje > 30 ? "#f97316" : "#22c55e");
-        
-    } catch (e) {
-        writeLog("ERROR: No se pudo conectar al servidor");
-    }
-}
-
-if (btnClear) {
-    btnClear.addEventListener("click", () => {
-        logEl.textContent = "Log limpiado.\n";
-    });
-}
-
-setInterval(actualizarEstado, 2000);
-actualizarEstado();
-writeLog("Sistema iniciado. Esperando datos...");
+        // Badge de rango
+        if (data.rango.includes('BAJO')) {
+            rangoBadge.innerHTML = '❄️ Rango Bajo';
+            rangoBadge.style.background = 'rgba(16,185,129,0.2)';
+            rangeIndicator.innerHTML = '❄️ Temperatura baja - Motor al 30%';
+            rangeIndicator.style.background = 'rgba(16,185,129,0.1)';
+            rangeIndicator.style.color = '#10b981';
+        } else if (data.rango.includes('MEDIO')) {
+            rangoBadge.innerHTML = '🌤️ Rango Medio';
+            rangoBadge.style.background = 'rgba(245,158,11,0.2)';
+            rangeIndicator.innerHTML = '🌤️ Temperatura moderada - Motor al 60%';
+            rangeIndicator.style.background = 'rgba(245,158,11,0.1)';
+            rangeIndicator.style.color = '#f59e0b';
+        } else if (data.rango.includes('ALTO')) {
+            rangoBadge.innerHTML = '🔥 Rango Alto';
+            rangoBadge.style.background = 'rgba(239,68,68,0.2)';
+            rangeIndicator.innerHTML = '🔥 Temperatura alta - Motor al 100%';
+            rangeIndicator.style.background = 'rgba(239,68,68,0
