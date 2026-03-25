@@ -1,95 +1,81 @@
-#!/usr/bin/env python3
 import socket
 import serial
 import threading
-import sys
+import time
 
-if sys.platform == "win32":
-    SERIAL_PORT = "COM3"
-else:
-    SERIAL_PORT = "/dev/ttyACM0"
-
-BAUDRATE = 9600
-HOST = "127.0.0.1"
+# --- CONFIGURACIÓN ---
+SERIAL_PORT = "/dev/ttyACM0"   # Ajusta según tu sistema (ej. COM3 en Windows)
+BAUDRATE    = 115200
+HOST = "0.0.0.0"
 PORT = 5001
+# ----------------------
 
-ser = None
-conexion = False
+ultimo_sensor = 0
+ultima_zona = 1
+ultima_velocidad = 0
+lock = threading.Lock()
 
-def conectar_serial():
-    global ser, conexion
-    try:
-        ser = serial.Serial(SERIAL_PORT, BAUDRATE, timeout=2)
-        ser.reset_input_buffer()
-        conexion = True
-        print(f"✅ Conectado a {SERIAL_PORT}")
-        return True
-    except:
-        print(f"❌ Error serial en {SERIAL_PORT}")
-        conexion = False
-        return False
-
-def enviar_comando(cmd):
-    global ser, conexion
-    if not conexion or not ser:
-        if not conectar_serial():
-            return "ERR:NO_SERIAL"
-    try:
-        ser.reset_input_buffer()
-        ser.write((cmd + "\n").encode())
-        ser.flush()
-        import time
-        start = time.time()
-        while time.time() - start < 1:
-            if ser.in_waiting:
-                return ser.readline().decode().strip()
-        return "ERR:TIMEOUT"
-    except:
-        conexion = False
-        return "ERR:COM"
-
-def manejar_cliente(conn, addr):
+def leer_serial(ser):
+    """Hilo que lee continuamente del serial y actualiza los valores."""
+    global ultimo_sensor, ultima_zona, ultima_velocidad
     while True:
-        data = conn.recv(1024)
-        if not data:
-            break
-        cmd = data.decode().strip()
-        if cmd.startswith("MOTOR:"):
-            try:
-                val = int(cmd[6:])
-                val = max(0, min(255, val))
-                resp = enviar_comando(f"MOTOR:{val}")
-                conn.sendall((resp + "\n").encode())
-            except:
-                conn.sendall(b"ERR:VALOR\n")
-        elif cmd == "STATUS":
-            resp = enviar_comando("STATUS")
-            conn.sendall((resp + "\n").encode())
-        elif cmd == "SENSOR":
-            resp = enviar_comando("SENSOR")
-            conn.sendall((resp + "\n").encode())
-        else:
-            conn.sendall(b"ERR:CMD\n")
-    conn.close()
+        try:
+            linea = ser.readline().decode('utf-8', errors='ignore').strip()
+            print(f"Serial: {linea}")  # Debug
+            
+            if linea.startswith("SENSOR:") and ",ZONA:" in linea:
+                # Formato: "SENSOR:225,ZONA:1,VEL:0"
+                partes = linea.split(",")
+                sensor_parte = partes[0]  # "SENSOR:225"
+                zona_parte = partes[1]    # "ZONA:1"
+                vel_parte = partes[2]     # "VEL:0"
+                
+                with lock:
+                    ultimo_sensor = int(sensor_parte[7:])
+                    ultima_zona = int(zona_parte[5:])
+                    ultima_velocidad = int(vel_parte[4:])
+                    
+                print(f"Actualizado - Sensor: {ultimo_sensor}, Zona: {ultima_zona}, Vel: {ultima_velocidad}")
+                    
+        except Exception as e:
+            print(f"Error serial: {e}")
+            time.sleep(0.1)
 
 def main():
-    print("=" * 40)
-    print("Servidor TCP - Control Motor")
-    print("=" * 40)
-    conectar_serial()
-    
+    try:
+        ser = serial.Serial(SERIAL_PORT, BAUDRATE, timeout=0.5)
+        print(f"Conectado a Arduino en {SERIAL_PORT} a {BAUDRATE} baudios")
+    except Exception as e:
+        print(f"Error al abrir puerto: {e}")
+        return
+
+    # Iniciar hilo de lectura serial
+    hilo = threading.Thread(target=leer_serial, args=(ser,), daemon=True)
+    hilo.start()
+
+    # Crear socket TCP
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((HOST, PORT))
         s.listen(5)
-        print(f"Escuchando en {HOST}:{PORT}")
+        print(f"Servidor TCP escuchando en {HOST}:{PORT}...")
+
         while True:
-            try:
-                conn, addr = s.accept()
-                threading.Thread(target=manejar_cliente, args=(conn, addr), daemon=True).start()
-            except KeyboardInterrupt:
-                print("\nServidor detenido")
-                break
+            conn, addr = s.accept()
+            with conn:
+                print(f"Conexión desde {addr}")
+                data = conn.recv(1024)
+                if not data:
+                    continue
+
+                cmd = data.decode("utf-8", errors="ignore").strip().upper()
+
+                if cmd == "GET_STATE":
+                    with lock:
+                        respuesta = f"SENSOR:{ultimo_sensor},ZONA:{ultima_zona},VEL:{ultima_velocidad}"
+                    conn.sendall((respuesta + "\n").encode("utf-8"))
+                else:
+                    conn.sendall(b"ERR:CMD\n")
 
 if __name__ == "__main__":
     main()
