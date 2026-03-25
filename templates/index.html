@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/static/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="bg-gradient"></div>
@@ -147,7 +148,7 @@
                     </div>
                     <div class="motor-visual">
                         <div class="motor-animation" id="motorAnimation">
-                            <i class="fas fa-cog fa-spin" id="motorIcon"></i>
+                            <i class="fas fa-cog" id="motorIcon"></i>
                         </div>
                         <div class="speed-indicator">
                             <div class="speed-bar-container">
@@ -157,7 +158,7 @@
                         </div>
                     </div>
                     <div class="motor-controls">
-                        <button class="mode-btn" id="modeAutoBtn">
+                        <button class="mode-btn active" id="modeAutoBtn">
                             <i class="fas fa-robot"></i>
                             <span>Automático</span>
                         </button>
@@ -257,7 +258,7 @@
                     </button>
                 </div>
                 <div class="console-content" id="log">
-                    <div class="log-entry system">[Sistema] Inicializando plataforma ThermalDrive...</div>
+                    <div class="log-entry success">[Sistema] Plataforma ThermalDrive iniciada</div>
                     <div class="log-entry system">[Sistema] Conectando al controlador del motor...</div>
                     <div class="log-entry success">[Sistema] Sistema listo. Monitoreo activo.</div>
                 </div>
@@ -265,7 +266,6 @@
         </main>
     </div>
     
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/static/js/app.js"></script>
 </body>
 </html>
