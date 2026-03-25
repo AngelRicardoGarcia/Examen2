@@ -3,47 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ThermalDrive | Login</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>ThermoDrive | Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
-<body class="auth-page">
-    <div class="auth-container">
-        <div class="auth-card">
-            <div class="auth-logo">
-                <div class="logo-icon">
-                    <i class="fas fa-microchip"></i>
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-logo">
+                <div class="brand-icon" style="margin: 0 auto 16px;">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
                 </div>
-                <h1>Thermal<span>Drive</span></h1>
-                <p>Sistema de Control Inteligente</p>
+                <div class="brand-name">Thermo<span>Drive</span></div>
             </div>
-            
-            <form method="POST" class="auth-form">
-                <div class="input-group">
-                    <i class="fas fa-user"></i>
-                    <input type="text" name="username" placeholder="Usuario" required autofocus>
+            <h2>Acceso al sistema</h2>
+            <form class="login-form" method="POST">
+                <div class="form-group">
+                    <input type="text" name="username" placeholder="Usuario" required>
                 </div>
-                <div class="input-group">
-                    <i class="fas fa-lock"></i>
+                <div class="form-group">
                     <input type="password" name="password" placeholder="Contraseña" required>
                 </div>
-                <button type="submit" class="auth-btn">
-                    <i class="fas fa-arrow-right-to-bracket"></i>
-                    Iniciar Sesión
-                </button>
-                {% if error %}
-                <div class="auth-error">
-                    <i class="fas fa-exclamation-circle"></i>
-                    {{ error }}
-                </div>
-                {% endif %}
+                <button type="submit" class="login-btn">Iniciar sesión</button>
             </form>
-            
-            <div class="auth-footer">
-                <p>Control de Motor DC por Temperatura</p>
-                <p>Examen Segundo Parcial</p>
-            </div>
+            {% if error %}
+                <p class="error-message">{{ error }}</p>
+            {% endif %}
         </div>
     </div>
 </body>
