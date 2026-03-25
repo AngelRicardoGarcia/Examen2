@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Control - Motor por Temperatura</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="top">
+            <div>
+                <h1>🎛️ Control Motor DC por Temperatura</h1>
+                <p>Puente H + Sensor DHT11 + PWM</p>
+            </div>
+            <a class="logout" href="/logout">🚪 Salir</a>
+        </header>
+
+        <main class="wrap">
+            <div class="grid">
+                <div class="card">
+                    <div class="card-head">
+                        <div class="dot" id="dotTemp"></div>
+                        <h2>Temperatura</h2>
+                        <div class="pill"><span id="tempValor">--</span> °C</div>
+                    </div>
+                    <div class="gauge"><div class="gauge-fill" id="gaugeFill"></div></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-head">
+                        <div class="dot" id="dotRango"></div>
+                        <h2>Rango Activo</h2>
+                    </div>
+                    <div class="rango-valor" id="rangoTexto">---</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-head">
+                        <div class="dot" id="dotMotor"></div>
+                        <h2>Velocidad Motor</h2>
+                        <div class="pill"><span id="velocidadValor">0</span>%</div>
+                    </div>
+                    <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+                    <div class="motor-badge" id="motorBadge"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-head">
+                        <div class="dot" id="dotEstado"></div>
+                        <h2>Estado</h2>
+                    </div>
+                    <div id="estadoTexto" class="estado-texto">---</div>
+                </div>
+            </div>
+
+            <div class="rangos-panel">
+                <div class="rango bajo">❄️ &lt; 25°C → 30%</div>
+                <div class="rango medio">🌤️ 25-30°C → 60%</div>
+                <div class="rango alto">🔥 &gt; 30°C → 100%</div>
+            </div>
+
+            <div class="console">
+                <div class="console-head">
+                    <strong>📝 Consola</strong>
+                    <button id="btnClear" class="btn">Limpiar</button>
+                </div>
+                <pre id="log" class="log">Sistema listo</pre>
+            </div>
+        </main>
+    </div>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
